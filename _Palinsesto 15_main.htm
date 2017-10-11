@@ -1,0 +1,312 @@
+<html>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+	<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+    <title></title>
+    <style type='text/css'>
+    html,body
+    {
+      margin: 0px 0px 0px 0px;
+      padding: 0px 0px 0px 0px;
+      border: 0px 0px 0px 0px;
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+    table
+    {
+    	border-collapse: separate;
+    }
+    table,th,td 
+    {
+      border-width: 0px;
+      padding: 0px;
+      border-style: none;
+      border-color: white;
+    }
+    </style>
+
+<script language='JavaScript'>	        
+	function CalcTextWidth(text,points,weight,family)
+	{
+		test=document.getElementById("Test");
+		test.style.fontFamily=family;
+		test.style.fontWeight=weight;
+		test.style.fontSize=points+ "px";
+		test.innerHTML=text;
+		return test.clientWidth;
+	}
+	
+	function CFS(mytext , WArea , fontMaxSize , fontWeight , fontFamily)
+	{
+		var j=1;
+		var FontSize = fontMaxSize;
+		var TextWidth = 0;
+		try
+		{
+			while (j > 0)
+			{
+				TextWidth = CalcTextWidth(mytext,FontSize,fontWeight,fontFamily);
+				if (TextWidth <= WArea) 
+					j = 0;
+				else
+					FontSize--;
+			};
+		}
+		catch(e){}
+		return FontSize;
+	}
+	function set_font_style(mytext)
+	{
+		var rethtml =  "<font style=\"color: #FFFFFF; font-size:60px ; font-family:'Arial' ; font-style:normal ; font-weight:normal\">" + mytext + "</font>";
+		var family="Arial";
+		var weight="normal";	
+		var fsizeMax=80;
+		var fsize=60;
+		var warea=1004;
+		fsize = CFS(mytext, warea, fsizeMax ,weight , family);
+		rethtml =  "<font style=\"color: #FFFFFF; font-size:" + fsize + "px ; font-family:'Arial' ; font-style:normal ; font-weight:normal\">" + mytext + "</font>";
+		return rethtml;
+	};
+       
+	        
+	function set_element_by_id(elid , eltext)
+	{
+		try{document.getElementById(elid).innerHTML=eltext;}catch(e){}
+	}
+	
+	function set_stop_kind_text(mytext)
+	{
+		set_element_by_id('idpftxttype' , mytext);
+	};
+	function set_stop_text(mytext)
+	{
+		var myhtml = set_font_style(mytext);
+		set_element_by_id('idpftxt' , myhtml);
+	};
+	
+	function leadzero(mynum)
+	{
+		var ret = "";
+		try
+		{
+			if (mynum < 10) 
+				ret = "0"+mynum;
+			else
+				ret = mynum;
+		}
+		catch(e){ret="";}
+		return ret;
+	};
+	
+	function update_dt()
+	{
+		try
+		{
+			var now = new Date();
+			var hour        = now.getHours();
+			var minute      = now.getMinutes();
+			var second      = now.getSeconds();
+			var month 			= now.getMonth() + 1;
+			var day    			= now.getDate();
+			var year        = now.getFullYear();
+			set_element_by_id('iddatetxt' , day + ' / ' + month + ' / ' + year);
+			set_element_by_id('idtimetxt' , hour + '.' + leadzero(minute) + '.' + leadzero(second));
+		}
+		catch(err)
+		{
+			set_element_by_id('iddatetxt' , "");
+			set_element_by_id('idtimetxt' , "");
+		}
+		
+	};
+	
+////////////////////////
+	
+	function update_page_rti()
+	{
+		try
+		{
+			var flag = 0;
+			var nst = "";
+			try{flag = rti.flag;}catch(e){flag = 0;}					
+			try{nst = unescape(rti.ns_text);}catch(e){nst = "";}	
+			if ((flag & 2) > 0)
+			{//nsa
+				set_stop_kind_text("PROSSIMA FERMATA:");	
+				if ((flag & 8) > 0) nst = nst + " (capolinea)";
+				set_stop_text(nst);
+			}
+			else if ((flag & 4) > 0)
+			{//sa
+				set_stop_kind_text("FERMATA:");	
+				if ((flag & 8) > 0) nst = nst + " (capolinea)";
+				set_stop_text(nst);
+			}
+			else
+			{
+				set_stop_kind_text("");	
+				set_stop_text("");
+			}				
+		}
+		catch(e)
+		{
+			set_stop_kind_text("");	
+			set_stop_text("");
+		}
+	}		
+	
+	function get_rt_info()
+	{
+		//aggiorno rti
+		try
+		{
+			var rti_new;
+			try{rti_new = parent.window.get_rti();}catch(e){}	
+			var new_id , old_id;
+			try{old_id = rti.id;}catch(e){old_id = -1;}					
+			try{new_id = rti_new.id;}catch(e){new_id = -1;}
+			if (new_id != old_id && new_id >= 0)
+			{
+				rti = rti_new;
+				update_page_rti();
+			}
+		}
+		catch(err)
+		{
+			try{}catch(e){}
+		}
+		try{update_dt();}catch(e){}
+		$.support.cors = true
+		$("#frame1").load("http://ctm.infora.it/messaggio");
+		setTimeout('get_rt_info()',1000);
+	}			
+	        
+</script>
+
+	        
+	</head>
+	<body bgColor="" background="" scroll=no oncontextmenu='return false'; ondragstart='return false'; onselectstart='return false';>
+		<NOBR><div id=Test style="position:absolute; left: 0px; top: 0px; visibility:hidden; height:1px;"></div></NOBR>
+		<div id =frame1 align="center" style='position:absolute;left:0px; top:570px; height:50px; width:830px; background-color:black; color:white; font-size:40px; z-index:10000'> 
+		SISTEMA MESSAGGISTICA CTM
+		</div>
+		<div id=frame0  style='align-vertical: middle; height:620px; width:830px; background-color:000000'>
+<!--
+<SPAN ID=frame0_spanid Style="position: absolute; left: 0px; top: 0px;  width:830px; height:520px">
+<iframe onload="startEffect();" style="position: absolute;Visibility:visible; left: 0px; top: 0px;"  id=frame0_page frameBorder=0 marginHeight=0 marginWidth=0 scrolling=0 width=830 height=580 allowtransparency='true'> </iframe>
+</span>
+-->
+
+
+
+<video id="myVideo" controls autoplay style='width:830px; height:auto;'>
+	<source src="/home/pi/Desktop/videos/small.mp4" type='video/mp4; codecs="h264"'>
+</video>
+
+
+<script language="javascript">
+var frame0_ppage=0;
+var frame0_PageTime=[17000,31000,67000,64000,64000,18000,52000,39000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000];
+var frame0_PageType=[1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var frame0_PageEffects=[23];
+var frame0_pPageEffects=0;
+var frame0_Pages=new Array("_Palinsesto 15_frame0_page0.htm","_Palinsesto 15_frame0_page1.htm","_Palinsesto 15_frame0_page2.htm","_Palinsesto 15_frame0_page3.htm","_Palinsesto 15_frame0_page4.htm","_Palinsesto 15_frame0_page5.htm","_Palinsesto 15_frame0_page6.htm","_Palinsesto 15_frame0_page7.htm","_Palinsesto 15_frame0_page8.htm","_Palinsesto 15_frame0_page9.htm","_Palinsesto 15_frame0_page10.htm","_Palinsesto 15_frame0_page11.htm","_Palinsesto 15_frame0_page12.htm","_Palinsesto 15_frame0_page13.htm","_Palinsesto 15_frame0_page14.htm","_Palinsesto 15_frame0_page15.htm","_Palinsesto 15_frame0_page16.htm","_Palinsesto 15_frame0_page17.htm","_Palinsesto 15_frame0_page18.htm","_Palinsesto 15_frame0_page19.htm","_Palinsesto 15_frame0_page20.htm","_Palinsesto 15_frame0_page21.htm","_Palinsesto 15_frame0_page22.htm","_Palinsesto 15_frame0_page23.htm");
+window.frames["frame0_page"].location=frame0_Pages[0];
+function startEffect(){
+try{frame0_spanid.filters[0].Play();}catch(err){}
+}
+var now = new Date();
+frame0_start_page=now.getTime();
+frame0_playing=1;
+frame0_pause_start=now.getTime();
+function frame0_pause(){try{if (frame0_playing == 1) {
+var now = new Date();
+frame0_pause_start=now.getTime();
+frame0_playing=0;
+if (frame0_PageType[frame0_ppage] != 0) window.frames[0].document.getElementById('player1').controls.pause();
+}}catch(e){}}
+function frame0_play(){try{var now = new Date();
+if (frame0_playing == 0) {frame0_start_page += Math.abs(now.getTime() - frame0_pause_start);
+frame0_playing = 1;}
+if (frame0_PageType[frame0_ppage] != 0){window.frames[0].document.getElementById('player1').controls.play();}
+}catch(e){}}
+function frame0_check(){try{var now = new Date();
+if (frame0_playing &&
+frame0_PageTime[frame0_ppage] > 0 &&
+Math.abs(now.getTime() - frame0_start_page) >= frame0_PageTime[frame0_ppage]){
+frame0_NextPage();
+frame0_start_page = now.getTime();}
+setTimeout('frame0_check()',1000);
+}catch(e){}}
+setTimeout('frame0_check()',1000);
+function frame0_NextPage()
+{
+frame0_spanid.style.filter ='progid:DXImageTransform.Microsoft.RevealTrans(duration=1, transition=0)';
+frame0_spanid.filters[0].transition=frame0_PageEffects[frame0_pPageEffects];
+frame0_pPageEffects++;
+if (frame0_pPageEffects >= 1) frame0_pPageEffects=0;
+frame0_ppage++;
+if (frame0_ppage >= 24) frame0_ppage=0;
+if (frame0_PageType[frame0_ppage] != 0) {
+frame0_spanid.filters[0].duration=0;
+}else{
+frame0_spanid.filters[0].duration=1;
+}
+frame0_spanid.filters[0].Apply();
+window.frames["frame0_page"].location=frame0_Pages[frame0_ppage];
+}
+</script>
+</div>
+
+		<!--
+		<div id=frame0 style='position:absolute;left:0px; top:0px; height:620px; width:830px ;background-image:url("");background-color:#000000; '>
+			<OBJECT ID="player1"
+				CLASSID="CLSID:6BF52A52-394A-11D3-B153-00C04F79FAA6"
+				TYPE="application/x-oleobject" height="620" width="830" >
+				<PARAM NAME="URL" VALUE="\VIDEO\">
+				<PARAM NAME="enableContextMenu" VALUE="0">
+				<PARAM NAME="fullScreen" VALUE="false">
+				<PARAM NAME="InvokeURLs" VALUE="false">
+				<PARAM NAME="stretchToFit" VALUE="true">
+				<PARAM NAME="uiMode" VALUE="none">
+				<PARAM NAME="PlayCount" VALUE="100000">
+				<PARAM NAME="enableErrorDialogs" VALUE="false">
+				<PARAM NAME="windowlessVideo" VALUE="false">
+				<PARAM NAME="AutoStart" VALUE="1">
+				<PARAM NAME="currentPosition" VALUE="0">
+				<PARAM NAME="ShowControls" VALUE="0">				
+			</OBJECT>
+		</div>
+		-->
+		<div id=frame0 style='position:absolute;left:0px; top:620px; height:148px; width:1024px ;background-image:url("");background-color:#323269; '>
+			<div align=center><font style="color: #E2E49A; font-size:45px ; font-family:'Arial' ; font-style:normal ; font-weight:normal"><span id=idpftxttype ></span></u></s></font></div>		
+			<div align=center ><span id=idpftxt></span></div>
+		</div>
+		
+		<div id=frame0 style='position:absolute;left:830px; top:0px; height:620px; width:194px ;background-image:url("");background-color:#222222; '>
+				<img src="_Palinsesto 15_logo.jpg" width=194 ><br><br>
+				<div align=center><font style="color: #E2E49A; font-size:35px ; font-family:'Arial' ; font-style:normal ; font-weight:normal"><span id=idtimetxt >HH.MM.SS</span></u></s></font><br>
+				<div align=center><font style="color: #E2E49A; font-size:25px ; font-family:'Arial' ; font-style:normal ; font-weight:normal"><span id=iddatetxt >DD/MM/YYYY</span></u></s></font>
+		</div>
+		
+		<script language='JavaScript'>			
+			try{			
+			var istst=1;
+			try{rti = parent.window.get_rti();}catch(e){rti = new Array();}	
+			if (istst)
+			{
+				try
+				{
+					rti.id = 1;
+					rti.flag = 2;
+					rti.ns_text = "Aesys - Seriate -";
+				}catch(e){}
+			}
+			update_dt();
+			update_page_rti();
+			}catch(e){}			
+			setTimeout('get_rt_info()',1000);
+		</script>
+	</body>
+</html>
