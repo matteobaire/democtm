@@ -18,7 +18,7 @@ video_paths ={}
 if not os.path.exists(DESTINATION_DIR):
     os.makedirs(DESTINATION_DIR)
 
-WGET_COMMAND = "wget -c -N -P  {} {} --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0"
+WGET_COMMAND = "wget -c -N -P  {} {} --retry-connrefused --waitretry=1 --tries=0 --read-timeout=20 --timeout=900 --continue -t 0"
 
 
 #funzione print su stessa linea
