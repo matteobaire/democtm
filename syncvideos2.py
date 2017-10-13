@@ -7,6 +7,8 @@ import urllib2
 import time
 import sys
 
+# TODO: inserire check nomi file
+
 BASE_URL = "ctm.infora.it"
 VIDEOS_URL = "video"
 
@@ -42,9 +44,9 @@ def switch_from_tmp():
     shutil.rmtree(DESTINATION_DIR)
     shutil.move(DESTINATION_DIR, DESTINATION_TMP_DIR)
 
-csvfile = ""
+csvfile = None
 print_no_newline("Checking videos on server")
-while csvfile == "":
+while csvfile is None:
     try:
         csvfile = urllib2.urlopen("http://{}/{}".format(BASE_URL, VIDEOS_URL))
     except Exception as e:
