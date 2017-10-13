@@ -1,6 +1,7 @@
 <html>
 <head>
 	<script src="videos.js" type="text/javascript"></script>
+	<meta id= meta http-equiv="refresh" />
 </head>
 
 <body bgcolor= "000000">
@@ -9,18 +10,27 @@
 
 	<script type="text/javascript">
 		var i=0;
+		var myduration = 0
 		var videocount = Object.keys(videosrc).length;
 		function videoPlay(videoNum){
 			document.getElementById("myvideo").setAttribute("src", videosrc[videoNum]);
 			document.getElementById("myvideo").load();
 			document.getElementById("myvideo").play();
 		}
+		
+		function putVideoDuration(duration){
+			document.getElementById("meta").setAttribute("content", String(duration));
+		}
 		document.getElementById("myvideo").addEventListener('ended', myHandler, false);
 		videoPlay(i);
 		function myHandler(){
 			i++;
+			myduration += document.getElementById("myvideo").duration;
 			if (i == (videocount)){
 				i=0;
+				newduration = myduration;
+				myduration = 0;
+				putVideoDuration(newduration);
 				videoPlay(i);
 			} else {
 				videoPlay(i);
